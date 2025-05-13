@@ -7,7 +7,8 @@ pipeline {
     }
     
     environment {
-        IMAGE = "bromaaascripts/banking:${BUILD_NUMBER}"
+        DOCKER_USER = "bromaaascripts"
+        IMAGE = "${DOCKER_USER}/banking:${BUILD_NUMBER}"
     }
   
     stages {
@@ -28,8 +29,10 @@ pipeline {
         }
         stage('Docker login'){
             steps {
-                withCredentials([usernamePassword(credentialsId: 'docker-cred', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
-                sh "echo \"\$PASS\" | docker login -u \"\$USER\" --password-stdin"
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'docker-cred', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
+                    sh 'echo "$PASS" | docker login -u "$USER" --password-stdin'
+                    }
                 }
             }
         }
@@ -37,10 +40,18 @@ pipeline {
             steps {
                 script {
                     sh "docker push $IMAGE"
-                    sh "docker tag $IMAGE bromaaascripts/banking:latest"
-                    sh "docker push bromaaascripts/banking:latest"
+                    sh "docker tag $IMAGE ${DOCKER_USER}/banking:latest"
+                    sh "docker push ${DOCKER_USER}/banking:latest"
                 }
             }
         }
     }
+
+    post {
+        always {
+            cleanWs()
+            sh 'docker image prune -f'
+        }
+    }
 }
+
