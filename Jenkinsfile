@@ -2,12 +2,12 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven3'
-        java 'jdk17' 
+        maven 'maven3'
+        jdk 'JDK17' 
     }
     
     environment {
-        IMAGE = "bromaaascripts/banking:latest"
+        IMAGE = "bromaaascripts/banking:${BUILD_NUMBER}"
     }
   
     stages {
@@ -37,6 +37,8 @@ pipeline {
             steps {
                 script {
                     sh "docker push $IMAGE"
+                    sh "docker tag $IMAGE bromaaascripts/banking:latest"
+                    sh "docker push bromaaascripts/banking:latest"
                 }
             }
         }
