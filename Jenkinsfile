@@ -17,6 +17,12 @@ pipeline {
                 git 'https://github.com/Cloud-savvy/FinPro.git'
             }
         }
+        stage('Check Java Version') {
+            steps {
+                sh 'java -version'
+                sh 'echo $JAVA_HOME'
+            }
+        }
         stage('Maven build'){
             steps {
                 sh 'mvn clean package'
